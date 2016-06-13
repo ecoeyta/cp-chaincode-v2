@@ -92,8 +92,7 @@ type CP struct {
 type Account struct {
 	ID          string  `json:"id"`
 	Prefix      string  `json:"prefix"`
-	CashBalance float64 `json:"cashBalance"`
-	AssetsIds   []string `json:"assetIds"`
+	VoteCount		float64 `json:"voteCount"`
 }
 
 type Transaction struct {
@@ -116,44 +115,6 @@ func (t *SimpleChaincode) Init(stub *shim.ChaincodeStub, function string, args [
 
 	fmt.Println("Initialization complete")
 	return nil, nil
-}
-
-func (t *SimpleChaincode) createAccounts(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
-
-	//  				0
-	// "number of accounts to create"
-	var err error
-	numAccounts, err := strconv.Atoi(args[0])
-	if err != nil {
-		fmt.Println("error creating accounts with input")
-		return nil, errors.New("createAccounts accepts a single integer argument")
-	}
-	//create a bunch of accounts
-	var account Account
-	counter := 1
-	for counter <= numAccounts {
-		var prefix string
-		suffix := "000A"
-		if counter < 10 {
-			prefix = strconv.Itoa(counter) + "0" + suffix
-		} else {
-			prefix = strconv.Itoa(counter) + suffix
-		}
-		var assetIds []string
-		account = Account{ID: "company" + strconv.Itoa(counter), Prefix: prefix, CashBalance: 10000000.0, AssetsIds: assetIds}
-		accountBytes, err := json.Marshal(&account)
-		if err != nil {
-			fmt.Println("error creating account" + account.ID)
-			return nil, errors.New("Error creating account " + account.ID)
-		}
-		err = stub.PutState(accountPrefix+account.ID, accountBytes)
-		counter++
-		fmt.Println("created account" + accountPrefix + account.ID)
-	}
-
-	fmt.Println("Accounts created")
-	return nil, nil
-
 }
 
 func (t *SimpleChaincode) createAccount(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
