@@ -92,7 +92,7 @@ type CP struct {
 type Account struct {
 	ID          string  `json:"id"`
 	Prefix      string  `json:"prefix"`
-	VoteCount		float64 `json:"voteCount"`
+	VoteCount	float64 `json:"voteCount"`
 }
 
 type Transaction struct {
@@ -126,10 +126,10 @@ func (t *SimpleChaincode) createAccount(stub *shim.ChaincodeStub, args []string)
     username := args[0]
     
     // Build an account object for the user
-    var assetIds []string
+    //var assetIds []string
     suffix := "000A"
     prefix := username + suffix
-    var account = Account{ID: username, Prefix: prefix, CashBalance: 10000000.0, AssetsIds: assetIds}
+    var account = Account{ID: username, Prefix: prefix, VoteCount: 10.0}
     accountBytes, err := json.Marshal(&account)
     if err != nil {
         fmt.Println("error creating account" + account.ID)
@@ -241,7 +241,7 @@ func (t *SimpleChaincode) issueCommercialPaper(stub *shim.ChaincodeStub, args []
 		return nil, errors.New("Error retrieving account " + cp.Issuer)
 	}
 	
-	account.AssetsIds = append(account.AssetsIds, cp.CUSIP)
+	//account.AssetsIds = append(account.AssetsIds, cp.CUSIP)
 
 	// Set the issuer to be the owner of all quantity
 	var owner Owner
@@ -534,15 +534,15 @@ func (t *SimpleChaincode) transferPaper(stub *shim.ChaincodeStub, args []string)
 	amountToBeTransferred -= (amountToBeTransferred) * (cp.Discount / 100.0) * (float64(cp.Maturity) / 360.0)
 	
 	// If toCompany doesn't have enough cash to buy the papers
-	if toCompany.CashBalance < amountToBeTransferred {
+	if toCompany.VoteCount < amountToBeTransferred {
 		fmt.Println("The company " + tr.ToCompany + "doesn't have enough cash to purchase the papers")		
 		return nil, errors.New("The company " + tr.ToCompany + "doesn't have enough cash to purchase the papers")	
 	} else {
 		fmt.Println("The ToCompany has enough money to be transferred for this paper")
 	}
 	
-	toCompany.CashBalance -= amountToBeTransferred
-	fromCompany.CashBalance += amountToBeTransferred
+	toCompany.VoteCount -= amountToBeTransferred
+	fromCompany.VoteCount += amountToBeTransferred
 
 	toOwnerFound := false
 	for key, owner := range cp.Owners {
@@ -567,7 +567,7 @@ func (t *SimpleChaincode) transferPaper(stub *shim.ChaincodeStub, args []string)
 		cp.Owners = append(cp.Owners, newOwner)
 	}
 	
-	fromCompany.AssetsIds = append(fromCompany.AssetsIds, tr.CUSIP)
+	//fromCompany.AssetsIds = append(fromCompany.AssetsIds, tr.CUSIP)
 
 	// Write everything back
 	// To Company
@@ -693,9 +693,9 @@ func (t *SimpleChaincode) Invoke(stub *shim.ChaincodeStub, function string, args
 	} else if function == "transferPaper" {
 		fmt.Println("Firing cretransferPaperateAccounts")
 		return t.transferPaper(stub, args)
-	} else if function == "createAccounts" {
+	/*} else if function == "createAccounts" {
 		fmt.Println("Firing createAccounts")
-		return t.createAccounts(stub, args)
+		return t.createAccounts(stub, args)*/
 	} else if function == "createAccount" {
         fmt.Println("Firing createAccount")
         return t.createAccount(stub, args)
